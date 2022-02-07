@@ -1,0 +1,22 @@
+sudo: required
+services:
+  - docker
+
+before_install: 
+  - docker build -t jingli666/react-test -f ./client/Dockerfile.dev ./client
+
+script: 
+  - docker fun jingli666/react-test npm test -- --coverage
+
+after_success: 
+  - docker build -t jingli666/muti-client ./client
+  - docker build -t jingli666/muti-nginx ./nginx
+  - docker build -t jingli666/muti-server ./server
+  - docker build -t jingli666/muti-worker ./worker
+  # Log in to the docker CLI
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  # take those images and push them to docker hub
+  - docker push jingli666/muti-client
+  - docker push jingli666/muti-nginx
+  - docker push jingli666/muti-server
+  - docker push jingli666/muti-worker
